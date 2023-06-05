@@ -31,26 +31,22 @@ type RouteParams = {
 
 export function Players (){
 
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(true);
+    const newPlayerNameInputRef = useRef<TextInput>(null);
 
     const [newPlayerName, setNewPlayerName] = useState('');
     const [team, setTeam] = useState('Time A');
     const [players, setPlayers] = useState<PlayerStorageDTO[]>([]);
-    
 
     const route = useRoute();
     const { group } = route.params as RouteParams;
     const navigation = useNavigation();
 
-    const newPlayerNameInputRef = useRef<TextInput>(null);
-
 
     async function handleAddPlayer() {
         if(newPlayerName.trim().length === 0){
             return Alert.alert("Novo jogador:", "Insira o nome do jogador.")
-
         }
-
         const newPlayer = {
             name: newPlayerName,
             team,
@@ -73,7 +69,7 @@ export function Players (){
             }
         }
     }
-
+////////////////////////////////////////////////////////////////////////////////////////////////
     async function fetchPlayersByTeam() {
         try {
             setIsLoading(true);
@@ -88,41 +84,48 @@ export function Players (){
             setIsLoading(false)
         }
     }
-
+////////////////////////////////////////////////////////////////////////////////////////////////
     async function handleRemovePlayer(playerName: string){
         try {
-            await playerRemoveByGroups(playerName, group);
-            fetchPlayersByTeam();
+            Alert.alert(
+              "AVISO:",
+              `O jogador: [${playerName}] será removido.`,
+              [
+                {text: 'CANCELAR', style: 'cancel'},
+                {text: 'CONFIRMAR', onPress:async () => {
+                    await playerRemoveByGroups(playerName, group);
+                    fetchPlayersByTeam(); 
+                }},
+              ],
+            );
         }
         catch(error){
             Alert.alert("Aviso:", "Não foi possível remover o jogador.")
         }
     }
-
+////////////////////////////////////////////////////////////////////////////////////////////////
     async function removeGroup(){
         try {
             await groupRemoveByName(group);
-            navigation.navigate('groups')
-            
-            
+            navigation.navigate('groups')  
         } 
         
         catch (error) {
             Alert.alert("Aviso:", "Não foi possível remover o grupo");
         }
     }
-
+////////////////////////////////////////////////////////////////////////////////////////////////
     async function handleRemoveGroup(){
         Alert.alert(
             "AVISO:",
-            `O grupo: (${group}) será removido.`,
+            `O grupo: [${group}] será removido.`,
             [
-                {text: 'NÃO', style: 'cancel'},
-                {text: 'SIM', onPress: () => removeGroup() }
+                {text: 'CANCELAR', style: 'cancel'},
+                {text: 'CONFIRMAR', onPress: () => removeGroup() }
             ]
         );
     }
-    
+////////////////////////////////////////////////////////////////////////////////////////////////    
     useEffect(() => {
         fetchPlayersByTeam(); 
     },[team]);
